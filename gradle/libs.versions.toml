@@ -1,6 +1,7 @@
 [versions]
-kotlin = "2.1.20"
-compose = "1.7.3"
+kotlin = "2.2.20"
+compose = "1.10.3"
+composeHotReload = "1.2.0-beta01"
 agp = "8.5.2"
 androidx-activityCompose = "1.9.3"
 kotlinxSerialization = "1.7.3"
@@ -18,3 +19,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }

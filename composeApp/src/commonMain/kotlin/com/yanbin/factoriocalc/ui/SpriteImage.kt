@@ -29,7 +29,10 @@ fun SpriteImage(
             srcOffset = srcOffset,
             srcSize = srcSize,
             dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()),
-            filterQuality = FilterQuality.None,
+            // Smooth (bilinear) scaling: uniform at any device-pixel ratio.
+            // FilterQuality.None (nearest) unevenly duplicates pixels at
+            // fractional DPI, which looks stretched/squished.
+            filterQuality = FilterQuality.Medium,
         )
     }
 }

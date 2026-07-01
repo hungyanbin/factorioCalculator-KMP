@@ -19,12 +19,17 @@ data class SpriteSheet(
 class AssetRepository(
     private val loader: SpriteLoader = SpriteLoader(),
 ) {
+    private val spritesCache = mutableListOf<Sprite>()
+
     @OptIn(ExperimentalResourceApi::class)
     suspend fun load(): SpriteSheet {
-        val json = Res.readBytes("files/$DATASET_FILE").decodeToString()
-        val sprites = loader.parse(json)
+        if (spritesCache.isEmpty()) {
+            val json = Res.readBytes("files/$DATASET_FILE").decodeToString()
+            spritesCache += loader.parse(json)
+        }
+
         val image = Res.readBytes("files/$SHEET_FILE").decodeToImageBitmap()
-        return SpriteSheet(image = image, sprites = sprites)
+        return SpriteSheet(image = image, sprites = spritesCache)
     }
 
     private companion object {

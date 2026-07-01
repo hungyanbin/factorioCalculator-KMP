@@ -72,7 +72,7 @@ private fun IconGrid(data: SpriteSheet) {
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             )
         }
-        items(data.sprites) { sprite ->
+        items(data.sprites, key = { sprite -> sprite.id }) { sprite ->
             SpriteImage(
                 sprite = sprite,
                 sheet = data.image,

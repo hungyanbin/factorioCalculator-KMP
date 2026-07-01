@@ -30,6 +30,7 @@ class SpriteLoader(
             .filterIsInstance<JsonArray>()
             .flatMap { array -> array.filterIsInstance<JsonObject>() }
             .mapNotNull { entity -> entity.toSpriteOrNull(url) }
+            .distinctBy { sprite -> sprite.id }
     }
 
     private fun spriteSheetUrl(root: JsonObject): String? {
@@ -51,10 +52,11 @@ class SpriteLoader(
             offset = Position(col * cell, row * cell),
             size = Size(cell, cell),
         )
+        val name = englishName() ?: return null
         return Sprite(
             asset = asset,
             id = key,
-            name = englishName(),
+            name = name,
             properties = scalarProperties(),
         )
     }

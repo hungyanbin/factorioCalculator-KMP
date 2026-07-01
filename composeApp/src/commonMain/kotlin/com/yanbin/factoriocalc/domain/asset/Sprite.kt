@@ -12,6 +12,6 @@ package com.yanbin.factoriocalc.domain.asset
 data class Sprite(
     val asset: GameAsset,
     val id: String,
-    val name: String?,
+    val name: String,
     val properties: Map<String, String> = emptyMap(),
 )

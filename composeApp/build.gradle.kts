@@ -58,6 +58,12 @@ kotlin {
     }
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.yanbin.factoriocalc.resources"
+    generateResClass = always
+}
+
 android {
     namespace = "com.yanbin.factoriocalc"
     compileSdk = libs.versions.compileSdk.get().toInt()

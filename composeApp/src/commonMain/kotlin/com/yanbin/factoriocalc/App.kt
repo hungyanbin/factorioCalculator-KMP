@@ -24,8 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.yanbin.factoriocalc.domain.asset.AssetRepository
-import com.yanbin.factoriocalc.domain.asset.SpriteSheet
+import com.yanbin.factoriocalc.data.GameDataRepository
+import com.yanbin.factoriocalc.data.SpriteSheet
 import com.yanbin.factoriocalc.ui.SpriteImage
 
 @Composable
@@ -35,7 +35,7 @@ fun App() {
         var error by remember { mutableStateOf<String?>(null) }
         LaunchedEffect(Unit) {
             try {
-                sheet = AssetRepository().load()
+                sheet = GameDataRepository().load()
             } catch (t: Throwable) {
                 error = "${t::class.simpleName}: ${t.message}"
             }

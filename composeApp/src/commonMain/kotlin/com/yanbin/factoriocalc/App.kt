@@ -1,5 +1,6 @@
 package com.yanbin.factoriocalc
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import com.yanbin.factoriocalc.data.GameDataRepository
 import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.Category
 import com.yanbin.factoriocalc.domain.dataset.category
+import com.yanbin.factoriocalc.ui.SpriteDetailDialog
 
 @Composable
 fun App() {
@@ -44,9 +46,9 @@ fun App() {
     MaterialTheme {
         var sprites by remember { mutableStateOf<List<Sprite>?>(null) }
         var error by remember { mutableStateOf<String?>(null) }
+        val repository = remember { GameDataRepository() }
         LaunchedEffect(Unit) {
             try {
-                val repository = GameDataRepository()
                 repository.load()
                 sprites = repository.getAllSprites()
             } catch (t: Throwable) {
@@ -63,18 +65,20 @@ fun App() {
             data == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            else -> SpriteBrowser(data)
+            else -> SpriteBrowser(data, repository)
         }
     }
 }
 
 @Composable
-private fun SpriteBrowser(allSprites: List<Sprite>) {
+private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataRepository) {
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     val sprites = remember(allSprites, selectedCategory) {
         val category = selectedCategory
         if (category == null) allSprites else allSprites.filter { it.category == category }
     }
+    val spriteById = remember(allSprites) { allSprites.associateBy { it.id } }
+    var selectedSprite by remember { mutableStateOf<Sprite?>(null) }
 
     Column(Modifier.fillMaxSize()) {
         CategoryDropdown(
@@ -82,7 +86,16 @@ private fun SpriteBrowser(allSprites: List<Sprite>) {
             onSelect = { selectedCategory = it },
             modifier = Modifier.padding(16.dp),
         )
-        IconGrid(sprites = sprites)
+        IconGrid(sprites = sprites, onSpriteClick = { selectedSprite = it })
+    }
+
+    selectedSprite?.let { sprite ->
+        SpriteDetailDialog(
+            sprite = sprite,
+            repository = repository,
+            spriteById = spriteById,
+            onDismiss = { selectedSprite = null },
+        )
     }
 }
 
@@ -113,7 +126,7 @@ private fun CategoryDropdown(
 }
 
 @Composable
-private fun IconGrid(sprites: List<Sprite>) {
+private fun IconGrid(sprites: List<Sprite>, onSpriteClick: (Sprite) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 96.dp),
         modifier = Modifier.fillMaxSize(),
@@ -132,7 +145,7 @@ private fun IconGrid(sprites: List<Sprite>) {
         items(sprites, key = { sprite -> sprite.id }) { sprite ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(4.dp),
+                modifier = Modifier.padding(4.dp).clickable { onSpriteClick(sprite) },
             ) {
                 AsyncImage(
                     model = sprite.uri,

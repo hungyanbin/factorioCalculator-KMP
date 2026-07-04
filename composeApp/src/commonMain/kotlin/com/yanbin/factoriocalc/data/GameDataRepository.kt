@@ -9,7 +9,10 @@ import com.yanbin.factoriocalc.domain.dataset.Item
 import com.yanbin.factoriocalc.domain.dataset.MiningDrill
 import com.yanbin.factoriocalc.domain.dataset.OffshorePump
 import com.yanbin.factoriocalc.domain.dataset.Planet
+import com.yanbin.factoriocalc.domain.dataset.RawMaterials
+import com.yanbin.factoriocalc.domain.dataset.Recipe
 import com.yanbin.factoriocalc.domain.dataset.RocketSilo
+import com.yanbin.factoriocalc.domain.dataset.computeRawMaterials
 import com.yanbin.factoriocalc.resources.Res
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -38,6 +41,7 @@ private data class RawDataset(
  */
 class GameDataRepository {
     private var raw: RawDataset? = null
+    private var recipesById: Map<String, Recipe>? = null
 
     private fun dataset(): RawDataset = checkNotNull(raw) { "call load() first" }
 
@@ -46,6 +50,22 @@ class GameDataRepository {
         raw ?: json
             .decodeFromString<RawDataset>(Res.readBytes("files/$DATASET_FILE").decodeToString())
             .also { raw = it }
+    }
+
+    @OptIn(ExperimentalResourceApi::class)
+    private suspend fun recipes(): Map<String, Recipe> =
+        recipesById ?: json
+            .decodeFromString<RecipeFileDto>(Res.readBytes("files/$RECIPE_FILE").decodeToString())
+            .recipes
+            .associate { it.key to it.toDomain() }
+            .also { recipesById = it }
+
+    suspend fun getRecipe(itemId: String): Recipe? = recipes()[itemId]
+
+    suspend fun getRawMaterials(itemId: String, amount: Double = 1.0): RawMaterials? {
+        val recipeMap = recipes()
+        if (itemId !in recipeMap) return null
+        return computeRawMaterials(itemId, amount) { id -> recipeMap[id] }
     }
 
     fun getBelts(): List<Belt> = dataset().belts.map { it.toDomain(dataset().sheet) }
@@ -73,5 +93,6 @@ class GameDataRepository {
 
     private companion object {
         const val DATASET_FILE = "sprites-space-age-2.0.55.json"
+        const val RECIPE_FILE = "space-age-2.0.55.json"
     }
 }

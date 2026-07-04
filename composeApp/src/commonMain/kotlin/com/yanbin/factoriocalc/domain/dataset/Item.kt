@@ -6,9 +6,9 @@ data class Item(
     override val id: String,
     override val name: String,
     override val uri: String,
-    val group: String,
-    val subgroup: String,
+    val group: ItemGroup,
+    val subgroup: ItemSubgroup,
     val order: String,
-    val type: String,
+    val type: ItemType,
     val stackSize: Int?,
 ) : Sprite

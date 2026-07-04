@@ -6,7 +6,7 @@ data class CraftingMachine(
     override val id: String,
     override val name: String,
     override val uri: String,
-    val craftingCategories: List<String>,
+    val craftingCategories: List<CraftingCategory>,
     val craftingSpeed: Double,
     val energySource: EnergySource,
     val energyUsage: Double,

@@ -24,7 +24,7 @@ internal fun CraftingMachineDto.toDomain(sheet: SpriteSheetRef): CraftingMachine
         id = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
-        craftingCategories = craftingCategories,
+        craftingCategories = craftingCategories.map { it.toCraftingCategory() },
         craftingSpeed = craftingSpeed,
         energySource = energySource,
         energyUsage = energyUsage,

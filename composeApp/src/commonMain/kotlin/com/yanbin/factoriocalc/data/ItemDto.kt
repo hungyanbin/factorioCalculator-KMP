@@ -21,9 +21,9 @@ internal fun ItemDto.toDomain(sheet: SpriteSheetRef): Item =
         id = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
-        group = group,
-        subgroup = subgroup,
+        group = group.toItemGroup(),
+        subgroup = subgroup.toItemSubgroup(),
         order = order,
-        type = type,
+        type = type.toItemType(),
         stackSize = stackSize,
     )

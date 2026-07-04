@@ -6,7 +6,7 @@ data class RocketSilo(
     override val id: String,
     override val name: String,
     override val uri: String,
-    val craftingCategories: List<String>,
+    val craftingCategories: List<CraftingCategory>,
     val craftingSpeed: Double,
     val energyUsage: Double,
     val moduleSlots: Int,

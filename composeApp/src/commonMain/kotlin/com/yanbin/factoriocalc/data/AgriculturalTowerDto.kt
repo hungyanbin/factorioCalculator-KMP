@@ -18,7 +18,7 @@ internal fun AgriculturalTowerDto.toDomain(sheet: SpriteSheetRef): AgriculturalT
     AgriculturalTower(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         energySource = energySource,
         energyUsage = energyUsage,
     )

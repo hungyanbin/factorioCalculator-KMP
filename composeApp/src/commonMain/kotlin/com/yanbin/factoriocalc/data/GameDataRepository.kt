@@ -1,6 +1,5 @@
 package com.yanbin.factoriocalc.data
 
-import androidx.compose.ui.graphics.ImageBitmap
 import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.AgriculturalTower
 import com.yanbin.factoriocalc.domain.dataset.Belt
@@ -15,13 +14,6 @@ import com.yanbin.factoriocalc.resources.Res
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.decodeToImageBitmap
-
-/** The decoded sprite sheet plus every sprite drawn from it, for the icon grid. */
-data class SpriteSheet(
-    val image: ImageBitmap,
-    val sprites: List<Sprite>,
-)
 
 private val json = Json { ignoreUnknownKeys = true }
 
@@ -40,24 +32,20 @@ private data class RawDataset(
 )
 
 /**
- * Loads the bundled, pre-flattened Factorio sprite dataset + its sprite sheet
- * from Compose resources. The sheet is decoded once into a single [ImageBitmap];
- * individual sprites are drawn as sub-rects of it (see the UI layer).
+ * Loads the bundled, pre-flattened Factorio sprite dataset from Compose resources.
+ * Sprites carry a `sprite://` URI (see [SpriteUri]) that Coil resolves against the
+ * sheet PNG directly — no decoded bitmap flows through this repository.
  */
 class GameDataRepository {
     private var raw: RawDataset? = null
-    private var image: ImageBitmap? = null
 
     private fun dataset(): RawDataset = checkNotNull(raw) { "call load() first" }
 
     @OptIn(ExperimentalResourceApi::class)
-    suspend fun load(): SpriteSheet {
-        val dataset = raw ?: json
+    suspend fun load() {
+        raw ?: json
             .decodeFromString<RawDataset>(Res.readBytes("files/$DATASET_FILE").decodeToString())
             .also { raw = it }
-        val bitmap = image ?: Res.readBytes("files/$SHEET_FILE").decodeToImageBitmap().also { image = it }
-
-        return SpriteSheet(image = bitmap, sprites = getAllSprites())
     }
 
     fun getBelts(): List<Belt> = dataset().belts.map { it.toDomain(dataset().sheet) }
@@ -85,6 +73,5 @@ class GameDataRepository {
 
     private companion object {
         const val DATASET_FILE = "sprites-space-age-2.0.55.json"
-        const val SHEET_FILE = "sprite-sheet-1d2b6676016208d82ff2a56043bb3e4d.png"
     }
 }

@@ -20,7 +20,7 @@ internal fun ItemDto.toDomain(sheet: SpriteSheetRef): Item =
     Item(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         group = group,
         subgroup = subgroup,
         order = order,

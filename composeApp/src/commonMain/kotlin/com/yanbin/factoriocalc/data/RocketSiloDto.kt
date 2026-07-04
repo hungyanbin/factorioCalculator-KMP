@@ -20,7 +20,7 @@ internal fun RocketSiloDto.toDomain(sheet: SpriteSheetRef): RocketSilo =
     RocketSilo(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         craftingCategories = craftingCategories,
         craftingSpeed = craftingSpeed,
         energyUsage = energyUsage,

@@ -23,7 +23,7 @@ internal fun MiningDrillDto.toDomain(sheet: SpriteSheetRef): MiningDrill =
     MiningDrill(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         energySource = energySource,
         energyUsage = energyUsage,
         miningSpeed = miningSpeed,

@@ -16,6 +16,6 @@ internal fun BeltDto.toDomain(sheet: SpriteSheetRef): Belt =
     Belt(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         speed = speed,
     )

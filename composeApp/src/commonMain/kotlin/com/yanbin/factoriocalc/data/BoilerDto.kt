@@ -19,7 +19,7 @@ internal fun BoilerDto.toDomain(sheet: SpriteSheetRef): Boiler =
     Boiler(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         energyConsumption = energyConsumption,
         targetTemperature = targetTemperature,
         energySource = energySource,

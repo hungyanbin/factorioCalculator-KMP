@@ -26,31 +26,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import com.yanbin.factoriocalc.coil.setupCoil
 import com.yanbin.factoriocalc.data.GameDataRepository
-import com.yanbin.factoriocalc.data.SpriteSheet
 import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.Category
 import com.yanbin.factoriocalc.domain.dataset.category
-import com.yanbin.factoriocalc.ui.SpriteImage
 
 @Composable
 fun App() {
+    setupCoil()
+
     MaterialTheme {
-        var sheet by remember { mutableStateOf<SpriteSheet?>(null) }
+        var sprites by remember { mutableStateOf<List<Sprite>?>(null) }
         var error by remember { mutableStateOf<String?>(null) }
         LaunchedEffect(Unit) {
             try {
-                sheet = GameDataRepository().load()
+                val repository = GameDataRepository()
+                repository.load()
+                sprites = repository.getAllSprites()
             } catch (t: Throwable) {
                 error = "${t::class.simpleName}: ${t.message}"
             }
         }
 
-        val data = sheet
+        val data = sprites
         val err = error
         when {
             err != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -65,11 +69,11 @@ fun App() {
 }
 
 @Composable
-private fun SpriteBrowser(data: SpriteSheet) {
+private fun SpriteBrowser(allSprites: List<Sprite>) {
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    val sprites = remember(data.sprites, selectedCategory) {
+    val sprites = remember(allSprites, selectedCategory) {
         val category = selectedCategory
-        if (category == null) data.sprites else data.sprites.filter { it.category == category }
+        if (category == null) allSprites else allSprites.filter { it.category == category }
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -78,7 +82,7 @@ private fun SpriteBrowser(data: SpriteSheet) {
             onSelect = { selectedCategory = it },
             modifier = Modifier.padding(16.dp),
         )
-        IconGrid(image = data.image, sprites = sprites)
+        IconGrid(sprites = sprites)
     }
 }
 
@@ -109,7 +113,7 @@ private fun CategoryDropdown(
 }
 
 @Composable
-private fun IconGrid(image: ImageBitmap, sprites: List<Sprite>) {
+private fun IconGrid(sprites: List<Sprite>) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 96.dp),
         modifier = Modifier.fillMaxSize(),
@@ -130,10 +134,11 @@ private fun IconGrid(image: ImageBitmap, sprites: List<Sprite>) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(4.dp),
             ) {
-                SpriteImage(
-                    sprite = sprite,
-                    sheet = image,
+                AsyncImage(
+                    model = sprite.uri,
+                    contentDescription = sprite.name,
                     modifier = Modifier.size(48.dp),
+                    filterQuality = FilterQuality.Medium,
                 )
                 Text(
                     text = sprite.name,

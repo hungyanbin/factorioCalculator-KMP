@@ -19,7 +19,7 @@ internal fun PlanetDto.toDomain(sheet: SpriteSheetRef): Planet =
     Planet(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         order = order,
         resources = resources,
         surfaceProperties = surfaceProperties,

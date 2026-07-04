@@ -1,6 +1,5 @@
 package com.yanbin.factoriocalc.domain.dataset
 
-import com.yanbin.factoriocalc.domain.asset.GameAsset
 import com.yanbin.factoriocalc.domain.asset.Sprite
 import kotlinx.serialization.Serializable
 
@@ -14,7 +13,7 @@ data class PlanetResources(
 data class Planet(
     override val id: String,
     override val name: String,
-    override val asset: GameAsset,
+    override val uri: String,
     val order: String,
     val resources: PlanetResources,
     val surfaceProperties: Map<String, Double>,

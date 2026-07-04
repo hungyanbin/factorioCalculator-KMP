@@ -16,6 +16,6 @@ internal fun OffshorePumpDto.toDomain(sheet: SpriteSheetRef): OffshorePump =
     OffshorePump(
         id = id,
         name = name,
-        asset = sheet.assetFor(iconCol, iconRow),
+        uri = sheet.uriFor(iconCol, iconRow),
         pumpingSpeed = pumpingSpeed,
     )

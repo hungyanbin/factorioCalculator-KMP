@@ -75,7 +75,7 @@ fun SpriteDetailDialog(
                     if (sprite.stackSize != null) {
                         InfoRow("Stack size", sprite.stackSize.toString())
                     }
-                    InfoRow("Group", sprite.group.name)
+                    InfoRow("Group", sprite.group.label)
                     InfoRow("Internal name", sprite.key)
                 } else {
                     InfoRow("Category", sprite.category.label)

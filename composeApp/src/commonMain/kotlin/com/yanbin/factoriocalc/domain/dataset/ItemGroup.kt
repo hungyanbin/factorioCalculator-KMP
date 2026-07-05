@@ -1,11 +1,11 @@
 package com.yanbin.factoriocalc.domain.dataset
 
-enum class ItemGroup {
-    COMBAT,
-    FLUIDS,
-    INTERMEDIATE_PRODUCTS,
-    LOGISTICS,
-    OTHER,
-    PRODUCTION,
-    SPACE,
+enum class ItemGroup(val label: String) {
+    COMBAT("Combat"),
+    FLUIDS("Fluids"),
+    INTERMEDIATE_PRODUCTS("Intermediate Products"),
+    LOGISTICS("Logistics"),
+    OTHER("Other"),
+    PRODUCTION("Production"),
+    SPACE("Space"),
 }

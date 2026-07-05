@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,6 +38,7 @@ import com.yanbin.factoriocalc.data.GameDataRepository
 import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.Category
 import com.yanbin.factoriocalc.domain.dataset.Item
+import com.yanbin.factoriocalc.domain.dataset.ItemGroup
 import com.yanbin.factoriocalc.domain.dataset.category
 import com.yanbin.factoriocalc.domain.dataset.uniqueKey
 import com.yanbin.factoriocalc.ui.SpriteDetailDialog
@@ -74,22 +76,47 @@ fun App() {
 
 @Composable
 private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataRepository) {
-    var selectedCateogry by remember { mutableStateOf<Category?>(null) }
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
+    var selectedGroup by remember { mutableStateOf<ItemGroup?>(null) }
     val categories = remember(allSprites) { allSprites.map { it.category }.distinct().sorted() }
-    val sprites = remember(allSprites, selectedCateogry) {
-        val category = selectedCateogry
-        if (category == null) allSprites else allSprites.filter { it.category == category }
+    val groups = remember(allSprites) {
+        allSprites.filterIsInstance<Item>().map { it.group }.distinct().sorted()
+    }
+    val sprites = remember(allSprites, selectedCategory, selectedGroup) {
+        val category = selectedCategory
+        val byCategory = if (category == null) allSprites else allSprites.filter { it.category == category }
+        val group = selectedGroup
+        if (category == Category.ITEM && group != null) {
+            byCategory.filter { it is Item && it.group == group }
+        } else {
+            byCategory
+        }
     }
     val itemsByKey = remember(allSprites) { allSprites.filterIsInstance<Item>().associateBy { it.key } }
     var selectedSprite by remember { mutableStateOf<Sprite?>(null) }
 
     Column(Modifier.fillMaxSize()) {
-        PrototypeTypeDropdown(
-            categories = categories,
-            selected = selectedCateogry,
-            onSelect = { selectedCateogry = it },
+        Column(
             modifier = Modifier.padding(16.dp),
-        )
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            LabeledDropdown(
+                label = "Category",
+                options = categories,
+                selected = selectedCategory,
+                optionLabel = { it.label },
+                onSelect = { selectedCategory = it; selectedGroup = null },
+            )
+            if (selectedCategory == Category.ITEM) {
+                LabeledDropdown(
+                    label = "Group",
+                    options = groups,
+                    selected = selectedGroup,
+                    optionLabel = { it.label },
+                    onSelect = { selectedGroup = it },
+                )
+            }
+        }
         IconGrid(sprites = sprites, onSpriteClick = { selectedSprite = it })
     }
 
@@ -104,27 +131,32 @@ private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataReposito
 }
 
 @Composable
-private fun PrototypeTypeDropdown(
-    categories: List<Category>,
-    selected: Category?,
-    onSelect: (Category?) -> Unit,
+private fun <T> LabeledDropdown(
+    label: String,
+    options: List<T>,
+    selected: T?,
+    optionLabel: (T) -> String,
+    onSelect: (T?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Box(modifier) {
-        OutlinedButton(onClick = { expanded = true }) {
-            Text((selected?.label ?: "All") + " ▾")
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text("All") },
-                onClick = { onSelect(null); expanded = false },
-            )
-            categories.forEach { category ->
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text("$label: ")
+        Box {
+            OutlinedButton(onClick = { expanded = true }) {
+                Text((selected?.let(optionLabel) ?: "All") + " ▾")
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 DropdownMenuItem(
-                    text = { Text(category.label) },
-                    onClick = { onSelect(category); expanded = false },
+                    text = { Text("All") },
+                    onClick = { onSelect(null); expanded = false },
                 )
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(optionLabel(option)) },
+                        onClick = { onSelect(option); expanded = false },
+                    )
+                }
             }
         }
     }

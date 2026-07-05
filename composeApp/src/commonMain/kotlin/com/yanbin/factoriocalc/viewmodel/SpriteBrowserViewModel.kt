@@ -1,5 +1,7 @@
 package com.yanbin.factoriocalc.viewmodel
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.yanbin.factoriocalc.data.GameDataRepository
 import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.Category

@@ -1,9 +1,10 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
@@ -11,7 +12,19 @@ plugins {
 }
 
 kotlin {
-    androidTarget()
+    android {
+        namespace = "com.yanbin.factoriocalc.shared"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
+
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+
+        androidResources {
+            enable = true
+        }
+    }
 
     jvm("desktop")
 
@@ -54,9 +67,6 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-        androidMain.dependencies {
-            implementation(libs.androidx.activity.compose)
-        }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
@@ -68,23 +78,6 @@ compose.resources {
     publicResClass = true
     packageOfResClass = "com.yanbin.factoriocalc.resources"
     generateResClass = always
-}
-
-android {
-    namespace = "com.yanbin.factoriocalc"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "com.yanbin.factoriocalc"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 }
 
 compose.desktop {

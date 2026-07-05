@@ -21,7 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,15 +32,13 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.yanbin.factoriocalc.coil.setupCoil
 import com.yanbin.factoriocalc.data.GameDataRepository
 import com.yanbin.factoriocalc.domain.asset.Sprite
-import com.yanbin.factoriocalc.domain.dataset.Category
-import com.yanbin.factoriocalc.domain.dataset.Item
-import com.yanbin.factoriocalc.domain.dataset.ItemGroup
-import com.yanbin.factoriocalc.domain.dataset.category
 import com.yanbin.factoriocalc.domain.dataset.uniqueKey
+import com.yanbin.factoriocalc.viewmodel.SpriteBrowserViewModel
 import com.yanbin.factoriocalc.ui.SpriteDetailDialog
 
 @Composable
@@ -48,52 +46,34 @@ fun App() {
     setupCoil()
 
     MaterialTheme {
-        var sprites by remember { mutableStateOf<List<Sprite>?>(null) }
-        var error by remember { mutableStateOf<String?>(null) }
-        val repository = remember { GameDataRepository() }
-        LaunchedEffect(Unit) {
-            try {
-                repository.load()
-                sprites = repository.getAllSprites()
-            } catch (t: Throwable) {
-                error = "${t::class.simpleName}: ${t.message}"
-            }
-        }
+        val viewModel = viewModel { SpriteBrowserViewModel(GameDataRepository()) }
+        val isLoading by viewModel.isLoading.collectAsState()
+        val error by viewModel.error.collectAsState()
 
-        val data = sprites
-        val err = error
         when {
-            err != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Load failed — $err", textAlign = TextAlign.Center)
+            error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Load failed — $error", textAlign = TextAlign.Center)
             }
-            data == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            else -> SpriteBrowser(data, repository)
+            else -> SpriteBrowser(viewModel)
         }
     }
 }
 
 @Composable
-private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataRepository) {
-    var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    var selectedGroup by remember { mutableStateOf<ItemGroup?>(null) }
-    val categories = remember(allSprites) { allSprites.map { it.category }.distinct().sorted() }
-    val groups = remember(allSprites) {
-        allSprites.filterIsInstance<Item>().map { it.group }.distinct().sorted()
-    }
-    val sprites = remember(allSprites, selectedCategory, selectedGroup) {
-        val category = selectedCategory
-        val byCategory = if (category == null) allSprites else allSprites.filter { it.category == category }
-        val group = selectedGroup
-        if (category == Category.ITEM && group != null) {
-            byCategory.filter { it is Item && it.group == group }
-        } else {
-            byCategory
-        }
-    }
-    val itemsByKey = remember(allSprites) { allSprites.filterIsInstance<Item>().associateBy { it.key } }
-    var selectedSprite by remember { mutableStateOf<Sprite?>(null) }
+private fun SpriteBrowser(viewModel: SpriteBrowserViewModel) {
+    val categoryOptions by viewModel.categoryOptions.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val showGroupDropdown by viewModel.showGroupDropdown.collectAsState()
+    val groupOptions by viewModel.groupOptions.collectAsState()
+    val selectedGroup by viewModel.selectedGroup.collectAsState()
+    val visibleSprites by viewModel.visibleSprites.collectAsState()
+    val itemsByKey by viewModel.itemsByKey.collectAsState()
+    val selectedSprite by viewModel.selectedSprite.collectAsState()
+    val recipe by viewModel.recipe.collectAsState()
+    val rawMaterials by viewModel.rawMaterials.collectAsState()
 
     Column(Modifier.fillMaxSize()) {
         Column(
@@ -102,30 +82,31 @@ private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataReposito
         ) {
             LabeledDropdown(
                 label = "Category",
-                options = categories,
+                options = categoryOptions,
                 selected = selectedCategory,
-                optionLabel = { it.label },
-                onSelect = { selectedCategory = it; selectedGroup = null },
+                optionLabel = { it?.label ?: "All" },
+                onSelect = viewModel::onCategorySelected,
             )
-            if (selectedCategory == Category.ITEM) {
+            if (showGroupDropdown) {
                 LabeledDropdown(
                     label = "Group",
-                    options = groups,
+                    options = groupOptions,
                     selected = selectedGroup,
-                    optionLabel = { it.label },
-                    onSelect = { selectedGroup = it },
+                    optionLabel = { it?.label ?: "All" },
+                    onSelect = viewModel::onGroupSelected,
                 )
             }
         }
-        IconGrid(sprites = sprites, onSpriteClick = { selectedSprite = it })
+        IconGrid(sprites = visibleSprites, onSpriteClick = viewModel::onSpriteClick)
     }
 
     selectedSprite?.let { sprite ->
         SpriteDetailDialog(
             sprite = sprite,
-            repository = repository,
+            recipe = recipe,
+            rawMaterials = rawMaterials,
             itemsByKey = itemsByKey,
-            onDismiss = { selectedSprite = null },
+            onDismiss = viewModel::onDialogDismiss,
         )
     }
 }
@@ -134,9 +115,9 @@ private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataReposito
 private fun <T> LabeledDropdown(
     label: String,
     options: List<T>,
-    selected: T?,
+    selected: T,
     optionLabel: (T) -> String,
-    onSelect: (T?) -> Unit,
+    onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -144,13 +125,9 @@ private fun <T> LabeledDropdown(
         Text("$label: ")
         Box {
             OutlinedButton(onClick = { expanded = true }) {
-                Text((selected?.let(optionLabel) ?: "All") + " ▾")
+                Text(optionLabel(selected) + " ▾")
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                DropdownMenuItem(
-                    text = { Text("All") },
-                    onClick = { onSelect(null); expanded = false },
-                )
                 options.forEach { option ->
                     DropdownMenuItem(
                         text = { Text(optionLabel(option)) },

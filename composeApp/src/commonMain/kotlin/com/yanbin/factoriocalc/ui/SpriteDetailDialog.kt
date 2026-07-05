@@ -16,11 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
@@ -28,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
-import com.yanbin.factoriocalc.data.GameDataRepository
 import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.Item
 import com.yanbin.factoriocalc.domain.dataset.RawMaterials
@@ -38,19 +32,11 @@ import com.yanbin.factoriocalc.domain.dataset.category
 @Composable
 fun SpriteDetailDialog(
     sprite: Sprite,
-    repository: GameDataRepository,
+    recipe: Recipe?,
+    rawMaterials: RawMaterials?,
     itemsByKey: Map<String, Item>,
     onDismiss: () -> Unit,
 ) {
-    var recipe by remember(sprite) { mutableStateOf<Recipe?>(null) }
-    var rawMaterials by remember(sprite) { mutableStateOf<RawMaterials?>(null) }
-
-    LaunchedEffect(sprite) {
-        val item = sprite as? Item
-        recipe = item?.let { repository.getRecipe(it.key) }
-        rawMaterials = item?.let { repository.getRawMaterials(it.key) }
-    }
-
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier.widthIn(max = 420.dp).heightIn(max = 640.dp),

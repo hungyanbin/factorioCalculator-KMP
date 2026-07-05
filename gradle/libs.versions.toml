@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.2.20"
+kotlin = "2.4.0"
 compose = "1.10.3"
 composeHotReload = "1.2.0-beta01"
 agp = "9.0.1"

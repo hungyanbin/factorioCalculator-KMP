@@ -21,7 +21,7 @@ internal data class MiningDrillDto(
 
 internal fun MiningDrillDto.toDomain(sheet: SpriteSheetRef): MiningDrill =
     MiningDrill(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         energySource = energySource,

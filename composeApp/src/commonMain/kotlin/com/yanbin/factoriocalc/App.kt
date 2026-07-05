@@ -35,8 +35,9 @@ import coil3.compose.AsyncImage
 import com.yanbin.factoriocalc.coil.setupCoil
 import com.yanbin.factoriocalc.data.GameDataRepository
 import com.yanbin.factoriocalc.domain.asset.Sprite
-import com.yanbin.factoriocalc.domain.dataset.Category
-import com.yanbin.factoriocalc.domain.dataset.category
+import com.yanbin.factoriocalc.domain.dataset.Item
+import com.yanbin.factoriocalc.domain.dataset.prototypeType
+import com.yanbin.factoriocalc.domain.dataset.uniqueKey
 import com.yanbin.factoriocalc.ui.SpriteDetailDialog
 
 @Composable
@@ -72,18 +73,20 @@ fun App() {
 
 @Composable
 private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataRepository) {
-    var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    val sprites = remember(allSprites, selectedCategory) {
-        val category = selectedCategory
-        if (category == null) allSprites else allSprites.filter { it.category == category }
+    var selectedPrototypeType by remember { mutableStateOf<String?>(null) }
+    val prototypeTypes = remember(allSprites) { allSprites.map { it.prototypeType }.distinct().sorted() }
+    val sprites = remember(allSprites, selectedPrototypeType) {
+        val prototypeType = selectedPrototypeType
+        if (prototypeType == null) allSprites else allSprites.filter { it.prototypeType == prototypeType }
     }
-    val spriteById = remember(allSprites) { allSprites.associateBy { it.id } }
+    val itemsByKey = remember(allSprites) { allSprites.filterIsInstance<Item>().associateBy { it.key } }
     var selectedSprite by remember { mutableStateOf<Sprite?>(null) }
 
     Column(Modifier.fillMaxSize()) {
-        CategoryDropdown(
-            selected = selectedCategory,
-            onSelect = { selectedCategory = it },
+        PrototypeTypeDropdown(
+            prototypeTypes = prototypeTypes,
+            selected = selectedPrototypeType,
+            onSelect = { selectedPrototypeType = it },
             modifier = Modifier.padding(16.dp),
         )
         IconGrid(sprites = sprites, onSpriteClick = { selectedSprite = it })
@@ -93,32 +96,33 @@ private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataReposito
         SpriteDetailDialog(
             sprite = sprite,
             repository = repository,
-            spriteById = spriteById,
+            itemsByKey = itemsByKey,
             onDismiss = { selectedSprite = null },
         )
     }
 }
 
 @Composable
-private fun CategoryDropdown(
-    selected: Category?,
-    onSelect: (Category?) -> Unit,
+private fun PrototypeTypeDropdown(
+    prototypeTypes: List<String>,
+    selected: String?,
+    onSelect: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier) {
         OutlinedButton(onClick = { expanded = true }) {
-            Text((selected?.label ?: "All") + " ▾")
+            Text((selected ?: "All") + " ▾")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text("All") },
                 onClick = { onSelect(null); expanded = false },
             )
-            Category.entries.forEach { category ->
+            prototypeTypes.forEach { prototypeType ->
                 DropdownMenuItem(
-                    text = { Text(category.label) },
-                    onClick = { onSelect(category); expanded = false },
+                    text = { Text(prototypeType) },
+                    onClick = { onSelect(prototypeType); expanded = false },
                 )
             }
         }
@@ -142,7 +146,7 @@ private fun IconGrid(sprites: List<Sprite>, onSpriteClick: (Sprite) -> Unit) {
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             )
         }
-        items(sprites, key = { sprite -> sprite.id }) { sprite ->
+        items(sprites, key = { sprite -> sprite.uniqueKey }) { sprite ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(4.dp).clickable { onSpriteClick(sprite) },

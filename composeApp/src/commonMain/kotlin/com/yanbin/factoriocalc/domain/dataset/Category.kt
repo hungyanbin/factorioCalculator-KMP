@@ -27,3 +27,29 @@ val Sprite.category: Category
         is Planet -> Category.PLANET
         else -> error("Unknown sprite type: ${this::class}")
     }
+
+/** The Factorio prototype type, e.g. "item", "fluid", "module" for items, or the [Category] label otherwise. */
+val Sprite.prototypeType: String
+    get() = when (this) {
+        is Item -> type.name.lowercase()
+        else -> category.label
+    }
+
+/**
+ * Identity unique across every sprite, including two sprites for the same real-world object in
+ * different categories (e.g. the [Belt] and [Item] both named "transport-belt"). Each concrete
+ * type's own `key` is only unique within its own category, so [category] disambiguates the rest.
+ */
+val Sprite.uniqueKey: String
+    get() = when (this) {
+        is Belt -> "${Category.BELT}:$key"
+        is Boiler -> "${Category.BOILER}:$key"
+        is CraftingMachine -> "${Category.CRAFTING_MACHINE}:$key"
+        is AgriculturalTower -> "${Category.AGRICULTURAL_TOWER}:$key"
+        is RocketSilo -> "${Category.ROCKET_SILO}:$key"
+        is MiningDrill -> "${Category.MINING_DRILL}:$key"
+        is OffshorePump -> "${Category.OFFSHORE_PUMP}:$key"
+        is Item -> "${Category.ITEM}:$key"
+        is Planet -> "${Category.PLANET}:$key"
+        else -> error("Unknown sprite type: ${this::class}")
+    }

@@ -18,7 +18,7 @@ internal data class RocketSiloDto(
 
 internal fun RocketSiloDto.toDomain(sheet: SpriteSheetRef): RocketSilo =
     RocketSilo(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         craftingCategories = craftingCategories.map { it.toCraftingCategory() },

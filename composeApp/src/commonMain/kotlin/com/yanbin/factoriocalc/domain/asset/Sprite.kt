@@ -6,7 +6,6 @@ package com.yanbin.factoriocalc.domain.asset
  * (e.g. `Belt`, `Boiler`, `Recipe`), each adding its own gameplay fields.
  */
 interface Sprite {
-    val id: String
     val name: String
     val uri: String
 }

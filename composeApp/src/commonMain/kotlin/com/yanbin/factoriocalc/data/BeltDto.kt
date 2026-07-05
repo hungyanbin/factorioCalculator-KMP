@@ -14,7 +14,7 @@ internal data class BeltDto(
 
 internal fun BeltDto.toDomain(sheet: SpriteSheetRef): Belt =
     Belt(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         speed = speed,

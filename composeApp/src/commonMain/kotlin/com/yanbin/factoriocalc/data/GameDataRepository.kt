@@ -79,17 +79,14 @@ class GameDataRepository {
     fun getPlanets(): List<Planet> = dataset().planets.map { it.toDomain(dataset().sheet) }
 
     /**
-     * Every sprite across all categories, for the icon grid. Machines/belts/etc.
-     * also appear as generic catalog entries in [getItems] under the same id
-     * (e.g. "boiler" is both a [Boiler] and an [Item]) — the more specific
-     * category wins so each id contributes exactly one sprite.
+     * Every sprite across all categories, for the icon grid. Machines/belts/etc. also appear as
+     * generic catalog entries in [getItems] under the same key (e.g. "boiler" is both a [Boiler]
+     * and an [Item]) — both are kept, since they represent different aspects of the same
+     * real-world object (e.g. a [Belt]'s speed vs. an [Item]'s recipe).
      */
-    fun getAllSprites(): List<Sprite> {
-        val typed = getBelts() + getBoilers() + getCraftingMachines() + getAgriculturalTowers() +
-            getRocketSilos() + getMiningDrills() + getOffshorePumps() + getPlanets()
-        val typedIds = typed.mapTo(mutableSetOf()) { it.id }
-        return typed + getItems().filterNot { it.id in typedIds }
-    }
+    fun getAllSprites(): List<Sprite> =
+        getBelts() + getBoilers() + getCraftingMachines() + getAgriculturalTowers() +
+            getRocketSilos() + getMiningDrills() + getOffshorePumps() + getPlanets() + getItems()
 
     private companion object {
         const val DATASET_FILE = "sprites-space-age-2.0.55.json"

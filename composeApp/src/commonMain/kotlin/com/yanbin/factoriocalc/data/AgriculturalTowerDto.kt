@@ -16,7 +16,7 @@ internal data class AgriculturalTowerDto(
 
 internal fun AgriculturalTowerDto.toDomain(sheet: SpriteSheetRef): AgriculturalTower =
     AgriculturalTower(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         energySource = energySource,

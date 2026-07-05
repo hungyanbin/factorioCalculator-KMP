@@ -11,7 +11,7 @@ data class PlanetResources(
 )
 
 data class Planet(
-    override val id: String,
+    val key: String,
     override val name: String,
     override val uri: String,
     val order: String,

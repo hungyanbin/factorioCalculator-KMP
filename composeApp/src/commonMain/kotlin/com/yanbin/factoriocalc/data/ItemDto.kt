@@ -18,7 +18,7 @@ internal data class ItemDto(
 
 internal fun ItemDto.toDomain(sheet: SpriteSheetRef): Item =
     Item(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         group = group.toItemGroup(),

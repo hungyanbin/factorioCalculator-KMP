@@ -33,21 +33,22 @@ import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.Item
 import com.yanbin.factoriocalc.domain.dataset.RawMaterials
 import com.yanbin.factoriocalc.domain.dataset.Recipe
-import com.yanbin.factoriocalc.domain.dataset.category
+import com.yanbin.factoriocalc.domain.dataset.prototypeType
 
 @Composable
 fun SpriteDetailDialog(
     sprite: Sprite,
     repository: GameDataRepository,
-    spriteById: Map<String, Sprite>,
+    itemsByKey: Map<String, Item>,
     onDismiss: () -> Unit,
 ) {
-    var recipe by remember(sprite.id) { mutableStateOf<Recipe?>(null) }
-    var rawMaterials by remember(sprite.id) { mutableStateOf<RawMaterials?>(null) }
+    var recipe by remember(sprite) { mutableStateOf<Recipe?>(null) }
+    var rawMaterials by remember(sprite) { mutableStateOf<RawMaterials?>(null) }
 
-    LaunchedEffect(sprite.id) {
-        recipe = repository.getRecipe(sprite.id)
-        rawMaterials = repository.getRawMaterials(sprite.id)
+    LaunchedEffect(sprite) {
+        val item = sprite as? Item
+        recipe = item?.let { repository.getRecipe(it.key) }
+        rawMaterials = item?.let { repository.getRawMaterials(it.key) }
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -61,25 +62,24 @@ fun SpriteDetailDialog(
 
                 recipe?.let {
                     Section(title = "Recipe") {
-                        RecipeRow(it, spriteById)
+                        RecipeRow(it, itemsByKey)
                     }
                 }
                 rawMaterials?.let {
                     Section(title = "Total raw") {
-                        RawMaterialsRow(it, spriteById)
+                        RawMaterialsRow(it, itemsByKey)
                     }
                 }
 
-                val stackSize = (sprite as? Item)?.stackSize
-                val prototypeType = when (sprite) {
-                    is Item -> sprite.type.name.lowercase()
-                    else -> sprite.category.label
+                if (sprite is Item) {
+                    if (sprite.stackSize != null) {
+                        InfoRow("Stack size", sprite.stackSize.toString())
+                    }
+                    InfoRow("Prototype type", sprite.prototypeType)
+                    InfoRow("Internal name", sprite.key)
+                } else {
+                    InfoRow("Prototype type", sprite.prototypeType)
                 }
-                if (stackSize != null) {
-                    InfoRow("Stack size", stackSize.toString())
-                }
-                InfoRow("Prototype type", prototypeType)
-                InfoRow("Internal name", sprite.id)
             }
         }
     }
@@ -119,7 +119,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun RecipeRow(recipe: Recipe, spriteById: Map<String, Sprite>) {
+private fun RecipeRow(recipe: Recipe, itemsByKey: Map<String, Item>) {
     FlowRow(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -127,17 +127,17 @@ private fun RecipeRow(recipe: Recipe, spriteById: Map<String, Sprite>) {
         TimeBadge(recipe.craftingTimeSeconds)
         recipe.ingredients.forEachIndexed { index, ingredient ->
             if (index > 0) Text("+")
-            SpriteAmount(ingredient.itemId, ingredient.amount, spriteById)
+            SpriteAmount(ingredient.itemId, ingredient.amount, itemsByKey)
         }
         Text("→")
         recipe.products.forEach { product ->
-            SpriteAmount(product.itemId, product.amount, spriteById)
+            SpriteAmount(product.itemId, product.amount, itemsByKey)
         }
     }
 }
 
 @Composable
-private fun RawMaterialsRow(rawMaterials: RawMaterials, spriteById: Map<String, Sprite>) {
+private fun RawMaterialsRow(rawMaterials: RawMaterials, itemsByKey: Map<String, Item>) {
     val entries = rawMaterials.materials.entries.sortedByDescending { it.value }
     FlowRow(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -145,7 +145,7 @@ private fun RawMaterialsRow(rawMaterials: RawMaterials, spriteById: Map<String, 
     ) {
         TimeBadge(rawMaterials.totalTimeSeconds)
         entries.forEach { (itemId, amount) ->
-            SpriteAmount(itemId, amount, spriteById)
+            SpriteAmount(itemId, amount, itemsByKey)
         }
     }
 }
@@ -159,18 +159,18 @@ private fun TimeBadge(seconds: Double) {
 }
 
 @Composable
-private fun SpriteAmount(itemId: String, amount: Double, spriteById: Map<String, Sprite>) {
-    val ingredientSprite = spriteById[itemId]
+private fun SpriteAmount(itemId: String, amount: Double, itemsByKey: Map<String, Item>) {
+    val ingredientItem = itemsByKey[itemId]
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        if (ingredientSprite != null) {
+        if (ingredientItem != null) {
             AsyncImage(
-                model = ingredientSprite.uri,
-                contentDescription = ingredientSprite.name,
+                model = ingredientItem.uri,
+                contentDescription = ingredientItem.name,
                 modifier = Modifier.size(28.dp),
                 filterQuality = FilterQuality.Medium,
             )
         }
-        Text(text = "${formatAmount(amount)}${if (ingredientSprite == null) " $itemId" else ""}")
+        Text(text = "${formatAmount(amount)}${if (ingredientItem == null) " $itemId" else ""}")
     }
 }
 

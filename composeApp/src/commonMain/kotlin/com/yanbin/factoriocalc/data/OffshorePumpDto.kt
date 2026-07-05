@@ -14,7 +14,7 @@ internal data class OffshorePumpDto(
 
 internal fun OffshorePumpDto.toDomain(sheet: SpriteSheetRef): OffshorePump =
     OffshorePump(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         pumpingSpeed = pumpingSpeed,

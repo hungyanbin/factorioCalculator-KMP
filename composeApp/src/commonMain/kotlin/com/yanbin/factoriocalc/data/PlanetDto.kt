@@ -17,7 +17,7 @@ internal data class PlanetDto(
 
 internal fun PlanetDto.toDomain(sheet: SpriteSheetRef): Planet =
     Planet(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         order = order,

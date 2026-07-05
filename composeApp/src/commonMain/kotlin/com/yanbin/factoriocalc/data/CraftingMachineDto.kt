@@ -21,7 +21,7 @@ internal data class CraftingMachineDto(
 
 internal fun CraftingMachineDto.toDomain(sheet: SpriteSheetRef): CraftingMachine =
     CraftingMachine(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         craftingCategories = craftingCategories.map { it.toCraftingCategory() },

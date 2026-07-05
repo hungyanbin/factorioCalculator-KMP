@@ -17,7 +17,7 @@ internal data class BoilerDto(
 
 internal fun BoilerDto.toDomain(sheet: SpriteSheetRef): Boiler =
     Boiler(
-        id = id,
+        key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
         energyConsumption = energyConsumption,

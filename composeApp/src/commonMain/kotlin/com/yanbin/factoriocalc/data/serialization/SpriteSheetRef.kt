@@ -1,4 +1,4 @@
-package com.yanbin.factoriocalc.data
+package com.yanbin.factoriocalc.data.serialization
 
 import kotlinx.serialization.Serializable
 
@@ -10,4 +10,9 @@ internal data class SpriteSheetRef(
 )
 
 internal fun SpriteSheetRef.uriFor(iconCol: Int, iconRow: Int): String =
-    spriteUri(sheetBasename = url.substringAfterLast('/'), col = iconCol, row = iconRow, cell = cell)
+    spriteUri(
+        sheetBasename = url.substringAfterLast('/'),
+        col = iconCol,
+        row = iconRow,
+        cell = cell
+    )

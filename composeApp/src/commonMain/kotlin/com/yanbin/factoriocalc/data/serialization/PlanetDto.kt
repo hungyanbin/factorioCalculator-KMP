@@ -1,4 +1,4 @@
-package com.yanbin.factoriocalc.data
+package com.yanbin.factoriocalc.data.serialization
 
 import com.yanbin.factoriocalc.domain.dataset.Planet
 import com.yanbin.factoriocalc.domain.dataset.PlanetResources

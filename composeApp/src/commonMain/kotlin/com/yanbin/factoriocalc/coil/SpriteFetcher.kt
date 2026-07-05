@@ -12,8 +12,8 @@ import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.ImageFetchResult
 import coil3.request.Options
-import com.yanbin.factoriocalc.data.ParsedSpriteUri
-import com.yanbin.factoriocalc.data.parseSpriteUri
+import com.yanbin.factoriocalc.data.serialization.ParsedSpriteUri
+import com.yanbin.factoriocalc.data.serialization.parseSpriteUri
 
 /**
  * Resolves a `sprite://` URI (see [com.yanbin.factoriocalc.data.SpriteUri]) by decoding the

@@ -1,34 +1,34 @@
-package com.yanbin.factoriocalc.data
+package com.yanbin.factoriocalc.data.serialization
 
+import com.yanbin.factoriocalc.domain.dataset.CraftingMachine
 import com.yanbin.factoriocalc.domain.dataset.EnergySource
-import com.yanbin.factoriocalc.domain.dataset.MiningDrill
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class MiningDrillDto(
+internal data class CraftingMachineDto(
     val id: String,
     val name: String,
     val iconCol: Int,
     val iconRow: Int,
+    val craftingCategories: List<String>,
+    val craftingSpeed: Double,
     val energySource: EnergySource,
     val energyUsage: Double,
-    val miningSpeed: Double,
     val moduleSlots: Int,
-    val resourceCategories: List<String>,
-    val takesFluid: Boolean,
     val allowedEffects: List<String> = emptyList(),
+    val prodBonus: Double = 0.0,
 )
 
-internal fun MiningDrillDto.toDomain(sheet: SpriteSheetRef): MiningDrill =
-    MiningDrill(
+internal fun CraftingMachineDto.toDomain(sheet: SpriteSheetRef): CraftingMachine =
+    CraftingMachine(
         key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
+        craftingCategories = craftingCategories.map { it.toCraftingCategory() },
+        craftingSpeed = craftingSpeed,
         energySource = energySource,
         energyUsage = energyUsage,
-        miningSpeed = miningSpeed,
         moduleSlots = moduleSlots,
-        resourceCategories = resourceCategories,
-        takesFluid = takesFluid,
         allowedEffects = allowedEffects,
+        prodBonus = prodBonus,
     )

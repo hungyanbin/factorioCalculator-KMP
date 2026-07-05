@@ -1,26 +1,24 @@
-package com.yanbin.factoriocalc.data
+package com.yanbin.factoriocalc.data.serialization
 
-import com.yanbin.factoriocalc.domain.dataset.Boiler
+import com.yanbin.factoriocalc.domain.dataset.AgriculturalTower
 import com.yanbin.factoriocalc.domain.dataset.EnergySource
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class BoilerDto(
+internal data class AgriculturalTowerDto(
     val id: String,
     val name: String,
     val iconCol: Int,
     val iconRow: Int,
-    val energyConsumption: Double,
-    val targetTemperature: Double,
     val energySource: EnergySource,
+    val energyUsage: Double,
 )
 
-internal fun BoilerDto.toDomain(sheet: SpriteSheetRef): Boiler =
-    Boiler(
+internal fun AgriculturalTowerDto.toDomain(sheet: SpriteSheetRef): AgriculturalTower =
+    AgriculturalTower(
         key = id,
         name = name,
         uri = sheet.uriFor(iconCol, iconRow),
-        energyConsumption = energyConsumption,
-        targetTemperature = targetTemperature,
         energySource = energySource,
+        energyUsage = energyUsage,
     )

@@ -1,4 +1,4 @@
-package com.yanbin.factoriocalc.data
+package com.yanbin.factoriocalc.data.serialization
 
 import com.yanbin.factoriocalc.domain.dataset.OffshorePump
 import kotlinx.serialization.Serializable

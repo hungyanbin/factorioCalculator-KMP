@@ -1,4 +1,4 @@
-package com.yanbin.factoriocalc.data
+package com.yanbin.factoriocalc.data.serialization
 
 import coil3.Uri
 import coil3.pathSegments

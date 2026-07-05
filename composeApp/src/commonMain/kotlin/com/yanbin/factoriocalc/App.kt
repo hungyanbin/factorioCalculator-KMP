@@ -35,8 +35,9 @@ import coil3.compose.AsyncImage
 import com.yanbin.factoriocalc.coil.setupCoil
 import com.yanbin.factoriocalc.data.GameDataRepository
 import com.yanbin.factoriocalc.domain.asset.Sprite
+import com.yanbin.factoriocalc.domain.dataset.Category
 import com.yanbin.factoriocalc.domain.dataset.Item
-import com.yanbin.factoriocalc.domain.dataset.prototypeType
+import com.yanbin.factoriocalc.domain.dataset.category
 import com.yanbin.factoriocalc.domain.dataset.uniqueKey
 import com.yanbin.factoriocalc.ui.SpriteDetailDialog
 
@@ -73,20 +74,20 @@ fun App() {
 
 @Composable
 private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataRepository) {
-    var selectedPrototypeType by remember { mutableStateOf<String?>(null) }
-    val prototypeTypes = remember(allSprites) { allSprites.map { it.prototypeType }.distinct().sorted() }
-    val sprites = remember(allSprites, selectedPrototypeType) {
-        val prototypeType = selectedPrototypeType
-        if (prototypeType == null) allSprites else allSprites.filter { it.prototypeType == prototypeType }
+    var selectedCateogry by remember { mutableStateOf<Category?>(null) }
+    val categories = remember(allSprites) { allSprites.map { it.category }.distinct().sorted() }
+    val sprites = remember(allSprites, selectedCateogry) {
+        val category = selectedCateogry
+        if (category == null) allSprites else allSprites.filter { it.category == category }
     }
     val itemsByKey = remember(allSprites) { allSprites.filterIsInstance<Item>().associateBy { it.key } }
     var selectedSprite by remember { mutableStateOf<Sprite?>(null) }
 
     Column(Modifier.fillMaxSize()) {
         PrototypeTypeDropdown(
-            prototypeTypes = prototypeTypes,
-            selected = selectedPrototypeType,
-            onSelect = { selectedPrototypeType = it },
+            categories = categories,
+            selected = selectedCateogry,
+            onSelect = { selectedCateogry = it },
             modifier = Modifier.padding(16.dp),
         )
         IconGrid(sprites = sprites, onSpriteClick = { selectedSprite = it })
@@ -104,25 +105,25 @@ private fun SpriteBrowser(allSprites: List<Sprite>, repository: GameDataReposito
 
 @Composable
 private fun PrototypeTypeDropdown(
-    prototypeTypes: List<String>,
-    selected: String?,
-    onSelect: (String?) -> Unit,
+    categories: List<Category>,
+    selected: Category?,
+    onSelect: (Category?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box(modifier) {
         OutlinedButton(onClick = { expanded = true }) {
-            Text((selected ?: "All") + " ▾")
+            Text((selected?.label ?: "All") + " ▾")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = { Text("All") },
                 onClick = { onSelect(null); expanded = false },
             )
-            prototypeTypes.forEach { prototypeType ->
+            categories.forEach { category ->
                 DropdownMenuItem(
-                    text = { Text(prototypeType) },
-                    onClick = { onSelect(prototypeType); expanded = false },
+                    text = { Text(category.label) },
+                    onClick = { onSelect(category); expanded = false },
                 )
             }
         }

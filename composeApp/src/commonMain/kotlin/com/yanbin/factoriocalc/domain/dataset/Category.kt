@@ -28,13 +28,6 @@ val Sprite.category: Category
         else -> error("Unknown sprite type: ${this::class}")
     }
 
-/** The Factorio prototype type, e.g. "item", "fluid", "module" for items, or the [Category] label otherwise. */
-val Sprite.prototypeType: String
-    get() = when (this) {
-        is Item -> type.name.lowercase()
-        else -> category.label
-    }
-
 /**
  * Identity unique across every sprite, including two sprites for the same real-world object in
  * different categories (e.g. the [Belt] and [Item] both named "transport-belt"). Each concrete

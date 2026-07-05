@@ -33,7 +33,7 @@ import com.yanbin.factoriocalc.domain.asset.Sprite
 import com.yanbin.factoriocalc.domain.dataset.Item
 import com.yanbin.factoriocalc.domain.dataset.RawMaterials
 import com.yanbin.factoriocalc.domain.dataset.Recipe
-import com.yanbin.factoriocalc.domain.dataset.prototypeType
+import com.yanbin.factoriocalc.domain.dataset.category
 
 @Composable
 fun SpriteDetailDialog(
@@ -75,10 +75,10 @@ fun SpriteDetailDialog(
                     if (sprite.stackSize != null) {
                         InfoRow("Stack size", sprite.stackSize.toString())
                     }
-                    InfoRow("Prototype type", sprite.prototypeType)
+                    InfoRow("Group", sprite.group.name)
                     InfoRow("Internal name", sprite.key)
                 } else {
-                    InfoRow("Prototype type", sprite.prototypeType)
+                    InfoRow("Category", sprite.category.label)
                 }
             }
         }
